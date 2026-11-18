@@ -11,7 +11,7 @@ https://script.google.com/macros/s/AKfycbxMmF_E3Q1eZ2IROSiPAmQUsqPdlDaT6lm13CXro
 | File | Role |
 |------|------|
 | `Code.gs` | Server-side Apps Script (dashboard data, add/update expenses) |
-| `Index.html` | Web app UI (budget overview, logging form, recent entries, 3-month summary) |
+| `Index.html` | Web app UI (budget overview, 10-day breakdown, logging form, recent entries, day templates, 3-month summary) |
 
 ## Setup (Google Apps Script)
 
@@ -23,3 +23,7 @@ https://script.google.com/macros/s/AKfycbxMmF_E3Q1eZ2IROSiPAmQUsqPdlDaT6lm13CXro
 ### Expenses columns
 
 Date | Category | Amount | Items | Significant | Record timestamp
+
+### Day templates
+
+The first dashboard load creates a **Templates** sheet. It stores three day setups. Each setup holds expenses you can add or remove. Applying a template appends every saved expense to the Expenses sheet for the date you pick. Redeploy the web app after updating `Code.gs` and `Index.html`.

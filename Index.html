@@ -781,6 +781,190 @@
       cursor: pointer;
       width: 40%;
     }
+
+    .days-grid-older {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .card-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .template-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .template-tab {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 6px;
+      cursor: pointer;
+      text-align: center;
+      min-width: 0;
+      transition: all 0.15s ease;
+    }
+
+    .template-tab:hover {
+      border-color: var(--border-focus);
+      background: var(--primary-50);
+    }
+
+    .template-tab.active {
+      background: var(--primary-50);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+
+    .template-tab-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .template-tab.active .template-tab-name {
+      color: var(--primary-dark);
+    }
+
+    .template-tab-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .template-name-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .template-name-row .form-control {
+      flex: 1;
+    }
+
+    .btn-small {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-small:hover {
+      background: #f1f5f9;
+    }
+
+    .template-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin: 12px 0 8px;
+    }
+
+    .template-items {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .template-item {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      padding: 7px 10px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .template-empty {
+      color: var(--text-muted);
+      font-size: 12px;
+      text-align: center;
+      padding: 16px 10px;
+      background: #f8fafc;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    .template-total {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      text-align: right;
+      min-height: 16px;
+    }
+
+    .template-remove {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color: #b91c1c;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .template-remove:hover {
+      background: #fee2e2;
+    }
+
+    .template-apply {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .template-confirm {
+      display: none;
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      background: var(--primary-50);
+      border: 1px solid var(--border-focus);
+    }
+
+    .template-confirm-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .template-confirm-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .template-confirm-actions .btn-secondary,
+    .template-confirm-actions .btn-submit {
+      width: auto;
+      flex: 1;
+    }
   </style>
 </head>
 <body>
@@ -858,13 +1042,20 @@
         <div class="budget-remaining-text" id="remainingSubtext">Calculating balance...</div>
 
         <div class="five-days-panel">
-          <div class="five-days-header">Past 5 Days Breakdown</div>
-          <div class="five-days-grid" id="daysGridContainer">
-            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-amt">$0</div></div>
-            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-amt">$0</div></div>
-            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-amt">$0</div></div>
-            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-amt">$0</div></div>
-            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-amt">$0</div></div>
+          <div class="five-days-header">Past 10 Days Breakdown</div>
+          <div class="five-days-grid" id="daysGridRecent">
+            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-date">-</div><div class="mini-day-amt">$0</div></div>
+            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-date">-</div><div class="mini-day-amt">$0</div></div>
+            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-date">-</div><div class="mini-day-amt">$0</div></div>
+            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-date">-</div><div class="mini-day-amt">$0</div></div>
+            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-date">-</div><div class="mini-day-amt">$0</div></div>
+          </div>
+          <div class="five-days-grid days-grid-older" id="daysGridOlder">
+            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-date">-</div><div class="mini-day-amt">$0</div></div>
+            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-date">-</div><div class="mini-day-amt">$0</div></div>
+            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-date">-</div><div class="mini-day-amt">$0</div></div>
+            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-date">-</div><div class="mini-day-amt">$0</div></div>
+            <div class="mini-day-card"><div class="mini-day-name">-</div><div class="mini-day-date">-</div><div class="mini-day-amt">$0</div></div>
           </div>
         </div>
       </div>
@@ -928,15 +1119,97 @@
 
     </div>
 
-    <!-- RIGHT COLUMN: LAST 5 DAYS ENTRIES -->
-    <div class="card" style="display: flex; flex-direction: column;">
-      <div class="card-header">
-        <h2 class="card-heading">Last 5 Days Entries</h2>
-        <span class="card-heading-badge" id="recentEntriesCount">0 records</span>
+    <!-- RIGHT COLUMN: LAST 5 DAYS ENTRIES + DAY TEMPLATES -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div class="card" style="display: flex; flex-direction: column;">
+        <div class="card-header">
+          <h2 class="card-heading">Last 5 Days Entries</h2>
+          <span class="card-heading-badge" id="recentEntriesCount">0 records</span>
+        </div>
+
+        <div id="last3DaysContainer" class="entries-container">
+          <div style="color:var(--text-muted); font-size:12px; text-align:center; padding: 24px;">Loading recent entries...</div>
+        </div>
       </div>
 
-      <div id="last3DaysContainer" class="entries-container">
-        <div style="color:var(--text-muted); font-size:12px; text-align:center; padding: 24px;">Loading recent entries...</div>
+      <div class="card" id="templateCard">
+        <div class="card-header" style="align-items: flex-start;">
+          <div>
+            <h2 class="card-heading">Day Templates</h2>
+            <div class="card-sub">Three setups for a day. Add or remove expenses, then log the whole day at once.</div>
+          </div>
+          <span class="card-heading-badge">3 setups</span>
+        </div>
+
+        <div class="template-tabs" id="templateTabs"></div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="templateNameInput">Template name</label>
+          <div class="template-name-row">
+            <input type="text" id="templateNameInput" class="form-control" maxlength="40" placeholder="e.g. Weekday">
+            <button type="button" class="btn-small" id="saveTemplateNameBtn">Save name</button>
+          </div>
+        </div>
+
+        <div class="template-section-label">Saved expenses</div>
+        <div id="templateItemsList" class="template-items"></div>
+        <div id="templateTotal" class="template-total"></div>
+
+        <div class="template-section-label">Add this template to a day</div>
+        <div class="template-apply">
+          <div>
+            <label class="form-label" for="templateApplyDate">Expense date</label>
+            <input type="date" id="templateApplyDate" class="form-control">
+          </div>
+          <button type="button" class="btn-submit" id="applyTemplateBtn">Add all expenses for this day</button>
+        </div>
+        <div class="template-confirm" id="templateApplyConfirm">
+          <div class="template-confirm-text" id="templateApplyConfirmText"></div>
+          <div class="template-confirm-actions">
+            <button type="button" class="btn-secondary" id="templateApplyCancel">Cancel</button>
+            <button type="button" class="btn-submit" id="templateApplyConfirmBtn">Confirm add</button>
+          </div>
+        </div>
+
+        <div class="template-section-label">Add an expense to this template</div>
+        <form id="templateItemForm">
+          <div class="form-group">
+            <label class="form-label" for="templateCategory">Category</label>
+            <select id="templateCategory" class="form-control" required>
+              <option value="" disabled selected>Select Category</option>
+              <option value="Food & Dining">🍔 Food & Dining</option>
+              <option value="Entertainment">🎬 Entertainment</option>
+              <option value="Personal">🛍️ Personal</option>
+              <option value="Shopping">📦 Shopping</option>
+              <option value="Family">👨‍👩‍👧 Family</option>
+              <option value="Transportation">🚌 Transportation</option>
+              <option value="Drive">🚗 Drive</option>
+              <option value="Extra">✨ Extra</option>
+              <option value="Others">📂 Others</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="templateAmount">Amount ($)</label>
+            <input type="number" id="templateAmount" step="0.01" min="0" placeholder="0.00" class="form-control" required>
+            <div class="quick-chips-row">
+              <button type="button" class="chip-btn" onclick="addTemplateAmount(5)">+$5</button>
+              <button type="button" class="chip-btn" onclick="addTemplateAmount(10)">+$10</button>
+              <button type="button" class="chip-btn" onclick="addTemplateAmount(20)">+$20</button>
+              <button type="button" class="chip-btn" onclick="addTemplateAmount(50)">+$50</button>
+              <button type="button" class="chip-btn" onclick="clearTemplateAmount()">Clear</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="templateDescription">Description / Items</label>
+            <input type="text" id="templateDescription" class="form-control" maxlength="500" placeholder="e.g. Lunch, MTR, coffee">
+          </div>
+          <label class="custom-toggle">
+            <input type="checkbox" id="templateIsSignificant">
+            <span class="toggle-title">Significant / Large One-off Purchase</span>
+          </label>
+          <button type="submit" class="btn-submit" id="addTemplateItemBtn">Add to template</button>
+        </form>
+        <div id="templateStatus" class="form-status"></div>
       </div>
     </div>
 
@@ -1013,11 +1286,24 @@
 </div>
 
 <script>
-  document.getElementById('date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('date').value = localDateInputValue();
 
   var isAppsScript = (typeof google !== 'undefined' && google.script && google.script.run);
   var currentDisplayedYear = new Date().getFullYear();
   var currentDisplayedMonth = new Date().getMonth();
+  var selectedTemplateSlot = 1;
+  var dayTemplates = [
+    { slot: 1, name: 'Template 1', items: [] },
+    { slot: 2, name: 'Template 2', items: [] },
+    { slot: 3, name: 'Template 3', items: [] }
+  ];
+  var templateRequestInFlight = false;
+  var TEMPLATE_STORAGE_KEY = 'dailyExpenseTemplatesV1';
+
+  try {
+    var storedSlot = Number(localStorage.getItem('dailyExpenseTemplateSlot'));
+    if (storedSlot >= 1 && storedSlot <= 3) selectedTemplateSlot = storedSlot;
+  } catch (e) {}
 
   function getCategoryClass(cat) {
     if (!cat) return 'cat-others';
@@ -1098,6 +1384,10 @@
     renderBudgetStats(data.budgetStats);
     renderLast5Days(data.last3DaysRecords);
     renderSummaryTable(data.summary3Month);
+    if (data.templates) {
+      dayTemplates = normalizeTemplates(data.templates);
+      renderTemplatePanel();
+    }
   }
 
   function renderBudgetStats(stats) {
@@ -1131,20 +1421,32 @@
       progressBar.style.width = '0%';
     }
 
-    if (stats.past5Days && stats.past5Days.length > 0) {
-      var html = '';
-      for (var i = 0; i < stats.past5Days.length; i++) {
-        var day = stats.past5Days[i];
-        var isToday = (day.label === 'Today');
-        var cardClass = isToday ? 'mini-day-card today-card' : 'mini-day-card';
-        html += '<div class="' + cardClass + '">' +
-          '<div class="mini-day-name">' + (isToday ? 'Today ★' : day.label) + '</div>' +
-          '<div class="mini-day-date">' + day.date + '</div>' +
-          '<div class="mini-day-amt">$' + Math.round(parseFloat(day.amount) || 0) + '</div>' +
-          '</div>';
-      }
-      document.getElementById('daysGridContainer').innerHTML = html;
+    var days = (stats.past10Days && stats.past10Days.length) ? stats.past10Days : (stats.past5Days || []);
+    renderDayRow('daysGridRecent', days.slice(0, 5));
+    renderDayRow('daysGridOlder', days.slice(5, 10));
+  }
+
+  function renderDayRow(containerId, days) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    if (!days || days.length === 0) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
     }
+    container.style.display = 'grid';
+    var html = '';
+    for (var i = 0; i < days.length; i++) {
+      var day = days[i];
+      var isToday = (day.label === 'Today');
+      var cardClass = isToday ? 'mini-day-card today-card' : 'mini-day-card';
+      html += '<div class="' + cardClass + '">' +
+        '<div class="mini-day-name">' + (isToday ? 'Today ★' : escapeHtml(day.label)) + '</div>' +
+        '<div class="mini-day-date">' + escapeHtml(day.date) + '</div>' +
+        '<div class="mini-day-amt">$' + Math.round(parseFloat(day.amount) || 0) + '</div>' +
+        '</div>';
+    }
+    container.innerHTML = html;
   }
 
   function renderLast5Days(records) {
@@ -1421,6 +1723,384 @@
     if (e.target === this) closeEditModal();
   });
 
+  function localDateInputValue(date) {
+    var d = date || new Date();
+    var month = ('0' + (d.getMonth() + 1)).slice(-2);
+    var day = ('0' + d.getDate()).slice(-2);
+    return d.getFullYear() + '-' + month + '-' + day;
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function defaultTemplates() {
+    return [
+      { slot: 1, name: 'Template 1', items: [] },
+      { slot: 2, name: 'Template 2', items: [] },
+      { slot: 3, name: 'Template 3', items: [] }
+    ];
+  }
+
+  function normalizeTemplates(raw) {
+    var templates = defaultTemplates();
+    var list = raw && raw.length ? raw : [];
+    for (var i = 0; i < list.length; i++) {
+      var slot = Number(list[i].slot);
+      if (slot < 1 || slot > 3) continue;
+      var target = templates[slot - 1];
+      if (list[i].name) target.name = String(list[i].name).slice(0, 40);
+      var items = list[i].items || [];
+      target.items = [];
+      for (var j = 0; j < items.length; j++) {
+        var item = items[j];
+        if (!item || item.id == null || String(item.id) === '') continue;
+        target.items.push({
+          id: String(item.id),
+          category: String(item.category || ''),
+          amount: (parseFloat(item.amount) || 0).toFixed(2),
+          items: String(item.items || ''),
+          isSignificant: item.isSignificant === true || item.isSignificant === 'true'
+        });
+      }
+    }
+    return templates;
+  }
+
+  function getSelectedTemplate() {
+    for (var i = 0; i < dayTemplates.length; i++) {
+      if (dayTemplates[i].slot === selectedTemplateSlot) return dayTemplates[i];
+    }
+    return dayTemplates[0];
+  }
+
+  function templateItemsTotal(items) {
+    var total = 0;
+    for (var i = 0; i < items.length; i++) total += parseFloat(items[i].amount) || 0;
+    return total;
+  }
+
+  function setTemplateStatus(message, kind) {
+    var el = document.getElementById('templateStatus');
+    el.className = 'form-status' + (kind ? ' ' + kind : '');
+    el.textContent = message || '';
+  }
+
+  function hideTemplateConfirm() {
+    document.getElementById('templateApplyConfirm').style.display = 'none';
+    document.getElementById('applyTemplateBtn').style.display = '';
+  }
+
+  function renderTemplatePanel() {
+    var tabs = document.getElementById('templateTabs');
+    var html = '';
+    for (var i = 0; i < dayTemplates.length; i++) {
+      var tpl = dayTemplates[i];
+      var active = tpl.slot === selectedTemplateSlot ? ' active' : '';
+      var countLabel = tpl.items.length === 1 ? '1 item' : (tpl.items.length + ' items');
+      html += '<button type="button" class="template-tab' + active + '" data-slot="' + tpl.slot + '" aria-pressed="' + (tpl.slot === selectedTemplateSlot ? 'true' : 'false') + '">' +
+        '<div class="template-tab-name">' + escapeHtml(tpl.name) + '</div>' +
+        '<div class="template-tab-meta">' + countLabel + ' · $' + Math.round(templateItemsTotal(tpl.items)) + '</div>' +
+        '</button>';
+    }
+    tabs.innerHTML = html;
+
+    var current = getSelectedTemplate();
+    var nameInput = document.getElementById('templateNameInput');
+    if (document.activeElement !== nameInput) nameInput.value = current.name;
+
+    var list = document.getElementById('templateItemsList');
+    if (!current.items.length) {
+      list.innerHTML = '<div class="template-empty">No expenses in this template yet. Add the ones you repeat, then apply them to a day.</div>';
+      document.getElementById('templateTotal').textContent = '';
+    } else {
+      var itemsHtml = '';
+      for (var n = 0; n < current.items.length; n++) {
+        var item = current.items[n];
+        var amt = parseFloat(item.amount) || 0;
+        var desc = item.items ? item.items : 'Unspecified expense';
+        itemsHtml += '<div class="template-item">' +
+          '<div class="tx-details">' +
+            '<div class="tx-item-title">' + escapeHtml(desc) +
+              (item.isSignificant ? ' <span class="badge-sig">Significant</span>' : '') +
+            '</div>' +
+            '<div class="tx-meta"><span class="badge-category-mini ' + getCategoryClass(item.category) + '">' + escapeHtml(item.category) + '</span></div>' +
+          '</div>' +
+          '<div class="tx-amount">$' + amt.toFixed(2) + '</div>' +
+          '<button type="button" class="template-remove" data-item-id="' + escapeHtml(item.id) + '" title="Remove from template">&times;</button>' +
+          '</div>';
+      }
+      list.innerHTML = itemsHtml;
+      var expenseWord = current.items.length === 1 ? 'expense' : 'expenses';
+      document.getElementById('templateTotal').textContent = current.items.length + ' ' + expenseWord + ' · $' + templateItemsTotal(current.items).toFixed(2);
+    }
+
+    document.getElementById('applyTemplateBtn').disabled = current.items.length === 0;
+  }
+
+  function loadLocalTemplates() {
+    try {
+      var raw = localStorage.getItem(TEMPLATE_STORAGE_KEY);
+      if (!raw) return null;
+      return normalizeTemplates(JSON.parse(raw));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveLocalTemplates() {
+    try {
+      localStorage.setItem(TEMPLATE_STORAGE_KEY, JSON.stringify(dayTemplates));
+      localStorage.setItem('dailyExpenseTemplateSlot', String(selectedTemplateSlot));
+    } catch (e) {}
+  }
+
+  function localTemplateId() {
+    return 'local-' + Date.now() + '-' + Math.floor(Math.random() * 100000);
+  }
+
+  function applyTemplateActionLocally(action, payload) {
+    var slot = Number(payload.slot);
+    var tpl = null;
+    for (var i = 0; i < dayTemplates.length; i++) {
+      if (dayTemplates[i].slot === slot) tpl = dayTemplates[i];
+    }
+    if (!tpl) return { status: 'error', message: 'Pick one of the 3 templates.' };
+
+    if (action === 'renameTemplate') {
+      var name = String(payload.name || '').trim().slice(0, 40);
+      if (!name) return { status: 'error', message: 'Enter a template name.' };
+      tpl.name = name;
+      return { status: 'success' };
+    }
+
+    if (action === 'addTemplateExpense') {
+      var category = String(payload.category || '').trim();
+      var amount = parseFloat(payload.amount);
+      if (!category) return { status: 'error', message: 'Select a category.' };
+      if (!(amount > 0)) return { status: 'error', message: 'Enter an amount greater than $0.' };
+      tpl.items.push({
+        id: localTemplateId(),
+        category: category,
+        amount: amount.toFixed(2),
+        items: String(payload.items || '').trim().slice(0, 500),
+        isSignificant: payload.isSignificant ? true : false
+      });
+      return { status: 'success' };
+    }
+
+    if (action === 'removeTemplateExpense') {
+      var next = [];
+      var removed = false;
+      for (var r = 0; r < tpl.items.length; r++) {
+        if (!removed && tpl.items[r].id === String(payload.itemId)) {
+          removed = true;
+          continue;
+        }
+        next.push(tpl.items[r]);
+      }
+      if (!removed) return { status: 'error', message: 'Template expense not found.' };
+      tpl.items = next;
+      return { status: 'success' };
+    }
+
+    if (action === 'applyTemplate') {
+      if (!tpl.items.length) return { status: 'error', message: 'This template has no expenses yet.' };
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(payload.date || ''))) {
+        return { status: 'error', message: 'Choose a valid date.' };
+      }
+      return { status: 'success', added: tpl.items.length, preview: true };
+    }
+
+    return { status: 'error', message: 'Unknown template action.' };
+  }
+
+  function finishTemplateAction(res, successText) {
+    templateRequestInFlight = false;
+    if (!res || res.status !== 'success') {
+      setTemplateStatus((res && res.message) ? res.message : 'Something went wrong.', 'error');
+      return;
+    }
+    if (res.templates) dayTemplates = normalizeTemplates(res.templates);
+    if (!isAppsScript) saveLocalTemplates();
+    hideTemplateConfirm();
+    renderTemplatePanel();
+    setTemplateStatus(successText(res), 'success');
+  }
+
+  function runTemplateAction(action, payload, successText) {
+    if (templateRequestInFlight) return;
+    templateRequestInFlight = true;
+    setTemplateStatus('Saving...', '');
+
+    if (!isAppsScript) {
+      finishTemplateAction(applyTemplateActionLocally(action, payload), successText);
+      return;
+    }
+
+    var runner = google.script.run
+      .withSuccessHandler(function(res) {
+        finishTemplateAction(res, successText);
+        if (action === 'applyTemplate' && res && res.status === 'success') refreshAllData();
+      })
+      .withFailureHandler(function(err) {
+        templateRequestInFlight = false;
+        setTemplateStatus('Failed: ' + (err && err.message ? err.message : err), 'error');
+      });
+
+    if (action === 'renameTemplate') runner.renameTemplate(payload);
+    else if (action === 'addTemplateExpense') runner.addTemplateExpense(payload);
+    else if (action === 'removeTemplateExpense') runner.removeTemplateExpense(payload);
+    else if (action === 'applyTemplate') runner.applyTemplate(payload);
+  }
+
+  function addTemplateAmount(val) {
+    var amtInput = document.getElementById('templateAmount');
+    var current = parseFloat(amtInput.value) || 0;
+    amtInput.value = (current + val).toFixed(2);
+  }
+
+  function clearTemplateAmount() {
+    document.getElementById('templateAmount').value = '';
+  }
+
+  function saveTemplateName() {
+    var name = document.getElementById('templateNameInput').value;
+    runTemplateAction('renameTemplate', { slot: selectedTemplateSlot, name: name }, function() {
+      return 'Template name saved.';
+    });
+  }
+
+  function submitTemplateItem(event) {
+    if (event) event.preventDefault();
+    var payload = {
+      slot: selectedTemplateSlot,
+      category: document.getElementById('templateCategory').value,
+      amount: document.getElementById('templateAmount').value,
+      items: document.getElementById('templateDescription').value,
+      isSignificant: document.getElementById('templateIsSignificant').checked
+    };
+    runTemplateAction('addTemplateExpense', payload, function() {
+      document.getElementById('templateAmount').value = '';
+      document.getElementById('templateDescription').value = '';
+      document.getElementById('templateIsSignificant').checked = false;
+      return 'Added to template.';
+    });
+  }
+
+  function removeTemplateItem(itemId) {
+    runTemplateAction('removeTemplateExpense', { slot: selectedTemplateSlot, itemId: itemId }, function() {
+      return 'Removed from template.';
+    });
+  }
+
+  function showTemplateApplyConfirm() {
+    var tpl = getSelectedTemplate();
+    var date = document.getElementById('templateApplyDate').value;
+    if (!tpl.items.length) {
+      setTemplateStatus('Add at least one expense to this template first.', 'error');
+      return;
+    }
+    if (!date) {
+      setTemplateStatus('Choose a date first.', 'error');
+      return;
+    }
+    var noun = tpl.items.length === 1 ? 'expense' : 'expenses';
+    document.getElementById('templateApplyConfirmText').textContent =
+      'Add all ' + tpl.items.length + ' ' + noun + ' ($' + templateItemsTotal(tpl.items).toFixed(2) + ') from "' + tpl.name + '" to ' + date + '?';
+    document.getElementById('templateApplyConfirm').style.display = 'block';
+    document.getElementById('applyTemplateBtn').style.display = 'none';
+    setTemplateStatus('', '');
+  }
+
+  function confirmApplyTemplate() {
+    var date = document.getElementById('templateApplyDate').value;
+    runTemplateAction('applyTemplate', { slot: selectedTemplateSlot, date: date }, function(res) {
+      var count = res && res.added ? res.added : getSelectedTemplate().items.length;
+      var noun = count === 1 ? 'expense' : 'expenses';
+      if (!isAppsScript) {
+        return 'Preview only: the deployed web app would add ' + count + ' ' + noun + ' on ' + date + '.';
+      }
+      return 'Added ' + count + ' ' + noun + ' on ' + date + '.';
+    });
+  }
+
+  function buildLocalPast10Days() {
+    var days = [];
+    var now = new Date();
+    for (var i = 0; i < 10; i++) {
+      var d = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
+      var label = i === 0 ? 'Today' : (i === 1 ? 'Yest' : (i + 'd ago'));
+      var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+      var dd = ('0' + d.getDate()).slice(-2);
+      days.push({ label: label, date: mm + '/' + dd, amount: '0.00' });
+    }
+    return days;
+  }
+
+  document.getElementById('templateTabs').addEventListener('click', function(e) {
+    var btn = e.target;
+    while (btn && btn !== this && !(btn.classList && btn.classList.contains('template-tab'))) {
+      btn = btn.parentNode;
+    }
+    if (!btn || btn === this) return;
+    var slot = Number(btn.getAttribute('data-slot'));
+    if (slot < 1 || slot > 3 || slot === selectedTemplateSlot) return;
+    selectedTemplateSlot = slot;
+    try { localStorage.setItem('dailyExpenseTemplateSlot', String(slot)); } catch (err) {}
+    hideTemplateConfirm();
+    renderTemplatePanel();
+    setTemplateStatus('', '');
+  });
+
+  document.getElementById('templateItemsList').addEventListener('click', function(e) {
+    var btn = e.target;
+    while (btn && btn !== this && !(btn.classList && btn.classList.contains('template-remove'))) {
+      btn = btn.parentNode;
+    }
+    if (!btn || btn === this) return;
+    removeTemplateItem(btn.getAttribute('data-item-id'));
+  });
+
+  document.getElementById('saveTemplateNameBtn').addEventListener('click', saveTemplateName);
+  document.getElementById('templateItemForm').addEventListener('submit', submitTemplateItem);
+  document.getElementById('applyTemplateBtn').addEventListener('click', showTemplateApplyConfirm);
+  document.getElementById('templateApplyCancel').addEventListener('click', function() {
+    hideTemplateConfirm();
+    setTemplateStatus('', '');
+  });
+  document.getElementById('templateApplyConfirmBtn').addEventListener('click', confirmApplyTemplate);
+
+  document.getElementById('templateApplyDate').value = localDateInputValue();
+
+  if (!isAppsScript) {
+    var storedTemplates = loadLocalTemplates();
+    if (storedTemplates) dayTemplates = storedTemplates;
+    var monthNamesLocal = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    renderBudgetStats({
+      monthName: monthNamesLocal[currentDisplayedMonth] + ' ' + currentDisplayedYear,
+      targetBudget: '0.00',
+      actualExpense: '0.00',
+      extraExpense: '0.00',
+      remaining: '0.00',
+      past10Days: buildLocalPast10Days()
+    });
+    var entriesBox = document.getElementById('last3DaysContainer');
+    entriesBox.innerHTML = '<div style="color:var(--text-muted); text-align:center; font-size:12px; padding:24px;">Open the deployed web app to load sheet entries. Template setups on this page stay in this browser.</div>';
+    document.getElementById('recentEntriesCount').textContent = '0 records';
+    document.getElementById('summaryTableContainer').innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:18px;">Open the deployed web app to load the 3-month summary.</div>';
+    var statusPill = document.getElementById('connectionStatus');
+    document.getElementById('connectionLabel').textContent = 'Local preview';
+    statusPill.href = '#';
+    statusPill.removeAttribute('target');
+  }
+
+  renderTemplatePanel();
   refreshAllData();
 </script>
 
