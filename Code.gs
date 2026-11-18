@@ -282,6 +282,7 @@ function getInitialDashboardData(reqYear, reqMonth) {
       past10DaysSummary.push({
         label: String(past10DaysMap[key].label),
         date: String(past10DaysMap[key].dateFormatted),
+        iso: String(key),
         amount: String(past10DaysMap[key].total.toFixed(2))
       });
     }

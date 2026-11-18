@@ -352,7 +352,7 @@
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: #94a3b8;
+      color: #facc15;
       text-align: center;
       margin-bottom: 8px;
     }
@@ -363,39 +363,45 @@
       gap: 6px;
     }
 
+    button.mini-day-card {
+      appearance: none;
+      -webkit-appearance: none;
+      font-family: inherit;
+      width: 100%;
+      cursor: pointer;
+    }
+
     .mini-day-card {
       background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(250, 204, 21, 0.28);
       border-radius: 8px;
       padding: 6px 2px;
       text-align: center;
+      color: #facc15;
     }
 
-    .mini-day-card.today-card {
-      background: rgba(59, 130, 246, 0.18);
-      border-color: rgba(96, 165, 250, 0.4);
+    .mini-day-card:hover,
+    .mini-day-card.selected-day {
+      background: rgba(250, 204, 21, 0.18);
+      border-color: #facc15;
     }
 
     .mini-day-name {
       font-size: 9px;
       font-weight: 700;
-      color: #94a3b8;
-    }
-
-    .mini-day-card.today-card .mini-day-name {
-      color: #93c5fd;
+      color: #facc15;
     }
 
     .mini-day-date {
       font-size: 8px;
-      color: #64748b;
+      color: #fde047;
       margin-bottom: 3px;
     }
 
     .mini-day-amt {
       font-size: 11px;
       font-weight: 700;
-      color: #38bdf8;
+      color: #facc15;
     }
 
     .form-group {
@@ -965,6 +971,10 @@
       width: auto;
       flex: 1;
     }
+
+    #templateCard.is-collapsed .template-editor {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -1136,14 +1146,17 @@
         <div class="card-header" style="align-items: flex-start;">
           <div>
             <h2 class="card-heading">Day Templates</h2>
-            <div class="card-sub">Three setups for a day. Add or remove expenses, then log the whole day at once.</div>
+            <div class="card-sub template-editor">Three setups for a day. Add or remove expenses, then log the whole day at once.</div>
           </div>
-          <span class="card-heading-badge">3 setups</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="card-heading-badge">3 setups</span>
+            <button type="button" class="btn-small" id="templateCollapseBtn" aria-expanded="true">Collapse</button>
+          </div>
         </div>
 
         <div class="template-tabs" id="templateTabs"></div>
 
-        <div class="form-group" style="margin-bottom: 0;">
+        <div class="form-group template-editor" style="margin-bottom: 0;">
           <label class="form-label" for="templateNameInput">Template name</label>
           <div class="template-name-row">
             <input type="text" id="templateNameInput" class="form-control" maxlength="40" placeholder="e.g. Weekday">
@@ -1151,11 +1164,11 @@
           </div>
         </div>
 
-        <div class="template-section-label">Saved expenses</div>
-        <div id="templateItemsList" class="template-items"></div>
-        <div id="templateTotal" class="template-total"></div>
+        <div class="template-section-label template-editor">Saved expenses</div>
+        <div id="templateItemsList" class="template-items template-editor"></div>
+        <div id="templateTotal" class="template-total template-editor"></div>
 
-        <div class="template-section-label">Add this template to a day</div>
+        <div class="template-section-label template-editor">Add this template to a day</div>
         <div class="template-apply">
           <div>
             <label class="form-label" for="templateApplyDate">Expense date</label>
@@ -1171,8 +1184,8 @@
           </div>
         </div>
 
-        <div class="template-section-label">Add an expense to this template</div>
-        <form id="templateItemForm">
+        <div class="template-section-label template-editor">Add an expense to this template</div>
+        <form id="templateItemForm" class="template-editor">
           <div class="form-group">
             <label class="form-label" for="templateCategory">Category</label>
             <select id="templateCategory" class="form-control" required>
@@ -1435,18 +1448,44 @@
       return;
     }
     container.style.display = 'grid';
+    var selectedIso = document.getElementById('date').value;
     var html = '';
     for (var i = 0; i < days.length; i++) {
       var day = days[i];
       var isToday = (day.label === 'Today');
-      var cardClass = isToday ? 'mini-day-card today-card' : 'mini-day-card';
-      html += '<div class="' + cardClass + '">' +
+      var iso = day.iso || '';
+      var cardClass = 'mini-day-card' + (iso && iso === selectedIso ? ' selected-day' : '');
+      html += '<button type="button" class="' + cardClass + '" data-iso="' + escapeHtml(iso) + '">' +
         '<div class="mini-day-name">' + (isToday ? 'Today ★' : escapeHtml(day.label)) + '</div>' +
         '<div class="mini-day-date">' + escapeHtml(day.date) + '</div>' +
         '<div class="mini-day-amt">$' + Math.round(parseFloat(day.amount) || 0) + '</div>' +
-        '</div>';
+        '</button>';
     }
     container.innerHTML = html;
+  }
+
+  function markSelectedExpenseDay() {
+    var selectedIso = document.getElementById('date').value;
+    var cards = document.querySelectorAll('.mini-day-card');
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].getAttribute('data-iso') === selectedIso) cards[i].classList.add('selected-day');
+      else cards[i].classList.remove('selected-day');
+    }
+  }
+
+  function selectExpenseDay(iso) {
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
+    document.getElementById('date').value = iso;
+    markSelectedExpenseDay();
+  }
+
+  function onPastDayClick(e) {
+    var card = e.target;
+    while (card && card !== this && !(card.classList && card.classList.contains('mini-day-card'))) {
+      card = card.parentNode;
+    }
+    if (!card || card === this) return;
+    selectExpenseDay(card.getAttribute('data-iso'));
   }
 
   function renderLast5Days(records) {
@@ -2038,7 +2077,7 @@
       var label = i === 0 ? 'Today' : (i === 1 ? 'Yest' : (i + 'd ago'));
       var mm = ('0' + (d.getMonth() + 1)).slice(-2);
       var dd = ('0' + d.getDate()).slice(-2);
-      days.push({ label: label, date: mm + '/' + dd, amount: '0.00' });
+      days.push({ label: label, date: mm + '/' + dd, iso: localDateInputValue(d), amount: '0.00' });
     }
     return days;
   }
@@ -2077,6 +2116,36 @@
   document.getElementById('templateApplyConfirmBtn').addEventListener('click', confirmApplyTemplate);
 
   document.getElementById('templateApplyDate').value = localDateInputValue();
+
+  var templatesCollapsed = false;
+  try {
+    templatesCollapsed = localStorage.getItem('dailyExpenseTemplatesCollapsed') === '1';
+  } catch (e) {}
+
+  function applyTemplateCollapse() {
+    var card = document.getElementById('templateCard');
+    var btn = document.getElementById('templateCollapseBtn');
+    if (templatesCollapsed) {
+      card.classList.add('is-collapsed');
+      btn.textContent = 'Expand';
+      btn.setAttribute('aria-expanded', 'false');
+    } else {
+      card.classList.remove('is-collapsed');
+      btn.textContent = 'Collapse';
+      btn.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  document.getElementById('templateCollapseBtn').addEventListener('click', function() {
+    templatesCollapsed = !templatesCollapsed;
+    try { localStorage.setItem('dailyExpenseTemplatesCollapsed', templatesCollapsed ? '1' : '0'); } catch (err) {}
+    applyTemplateCollapse();
+  });
+  applyTemplateCollapse();
+
+  document.getElementById('daysGridRecent').addEventListener('click', onPastDayClick);
+  document.getElementById('daysGridOlder').addEventListener('click', onPastDayClick);
+  document.getElementById('date').addEventListener('change', markSelectedExpenseDay);
 
   if (!isAppsScript) {
     var storedTemplates = loadLocalTemplates();
