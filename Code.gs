@@ -3,7 +3,7 @@ function doGet(e) {
   var file = page === 'fin' ? 'Fin' : 'Index';
   var template = HtmlService.createTemplateFromFile(file);
   template.appUrl = ScriptApp.getService().getUrl();
-  var title = page === 'fin' ? 'Fin Dashboard' : 'Daily Expense Tracker';
+  var title = page === 'fin' ? 'Monthly budget' : 'Daily Expense Tracker';
   return template.evaluate()
     .setTitle(title)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')

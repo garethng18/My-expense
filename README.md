@@ -12,7 +12,7 @@ https://script.google.com/macros/s/AKfycbxMmF_E3Q1eZ2IROSiPAmQUsqPdlDaT6lm13CXro
 |------|------|
 | `Code.gs` | Server-side Apps Script (dashboard data, add/update expenses, Fin dashboard) |
 | `Index.html` | Daily expense UI |
-| `Fin.html` | Monthly Fin grid. Open it from the Daily page, or add `?page=fin` to the web app URL. |
+| `Fin.html` | Monthly budget page. The Daily page has a Monthly budget button, and this page has a Daily expenses button. The deployed address is the same web app with `?page=fin`. |
 
 ## Setup (Google Apps Script)
 

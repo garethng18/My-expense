@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fin Dashboard</title>
+  <title>Monthly budget</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -46,6 +46,17 @@
       cursor: pointer;
     }
     .nav a.current, .year-btn.active { color: var(--primary-dark); background: var(--primary-50); border-color: #bfdbfe; }
+    a.switch {
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: #fff;
+      background: var(--primary);
+      border: 1px solid var(--primary-dark);
+      border-radius: 8px;
+      padding: 6px 12px;
+    }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: 0 1px 2px rgb(15 23 42 / 0.04); }
     .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
     .tile { background: #f8fafc; border-radius: 10px; padding: 10px; }
@@ -88,13 +99,10 @@
   <header>
     <div class="brand">
       <div>
-        <h1>Fin Dashboard</h1>
+        <h1>Monthly budget</h1>
         <div class="sub">Items down the side, one column per month. Type a cell to save it.</div>
       </div>
-      <div class="nav">
-        <a id="dailyLink" href="Index.html" target="_top">Daily</a>
-        <a class="current" href="Fin.html">Fin</a>
-      </div>
+      <a id="dailyLink" class="switch" href="Index.html" target="_top">Daily expenses</a>
     </div>
   </header>
 

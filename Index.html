@@ -180,6 +180,26 @@
       color: var(--text-main);
     }
 
+    .btn-page {
+      background: var(--primary);
+      border: 1px solid var(--primary-dark);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-page:hover {
+      background: var(--primary-dark);
+      color: #fff;
+    }
+
     #errorBanner {
       display: none;
       background: var(--danger-bg);
@@ -1018,10 +1038,6 @@
       <div>
         <h1 class="brand-title">Daily Expense Tracker</h1>
         <div class="brand-sub">Smart budget sync & activity logs</div>
-        <div class="page-nav">
-          <a class="page-link is-current" href="Index.html">Daily</a>
-          <a class="page-link" id="finLink" href="Fin.html" target="_top">Fin</a>
-        </div>
       </div>
     </div>
 
@@ -1034,6 +1050,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>
       </a>
+      <a id="finLink" class="btn-page" href="Fin.html" target="_top">Monthly budget</a>
       <button class="btn-refresh" onclick="refreshAllData()" title="Reload latest records">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
