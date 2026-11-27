@@ -1,8 +1,49 @@
-function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Index')
-    .setTitle('Daily Expense Tracker')
+function doGet(e) {
+  var page = e && e.parameter && e.parameter.page;
+  var file = page === 'fin' ? 'Fin' : 'Index';
+  var template = HtmlService.createTemplateFromFile(file);
+  template.appUrl = ScriptApp.getService().getUrl();
+  var title = page === 'fin' ? 'Fin Dashboard' : 'Daily Expense Tracker';
+  return template.evaluate()
+    .setTitle(title)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL); // Allows embedding in other web apps
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function budgetMonthParts_(raw) {
+  if (raw instanceof Date && !isNaN(raw.getTime())) {
+    return { year: raw.getFullYear(), month: raw.getMonth() };
+  }
+  if (typeof raw === 'number' && isFinite(raw)) {
+    var parsed = new Date(Date.UTC(1899, 11, 30) + Math.round(raw) * 86400000);
+    return { year: parsed.getUTCFullYear(), month: parsed.getUTCMonth() };
+  }
+  if (typeof raw === 'string' && raw.trim() !== '') {
+    var text = raw.trim();
+    var match = text.match(/^(\d{4})-(\d{1,2})/);
+    if (match) return { year: Number(match[1]), month: Number(match[2]) - 1 };
+    var testD = new Date(text);
+    if (!isNaN(testD.getTime())) return { year: testD.getFullYear(), month: testD.getMonth() };
+  }
+  return null;
+}
+
+function readBudgetTable_(budgetSheet) {
+  var rows = [];
+  if (!budgetSheet || budgetSheet.getLastRow() < 2) return rows;
+  var values = budgetSheet.getRange(2, 1, budgetSheet.getLastRow() - 1, 4).getValues();
+  for (var i = 0; i < values.length; i++) {
+    var parts = budgetMonthParts_(values[i][0]);
+    if (!parts) continue;
+    rows.push({
+      year: parts.year,
+      month: parts.month,
+      target: Number(parseFloat(values[i][1]) || 0),
+      actual: Number(parseFloat(values[i][2]) || 0),
+      extra: Number(parseFloat(values[i][3]) || 0)
+    });
+  }
+  return rows;
 }
 
 function addExpense(formData) {
@@ -80,29 +121,19 @@ function getInitialDashboardData(reqYear, reqMonth) {
     // 1. Target Year & Month Resolution
     let targetYear = (reqYear !== undefined && reqYear !== null) ? Number(reqYear) : now.getFullYear();
     let targetMonth = (reqMonth !== undefined && reqMonth !== null) ? Number(reqMonth) : now.getMonth();
-    let targetBudget = 0;
-    
     let budgetSheet = ss.getSheetByName('Budget');
-    if (budgetSheet && budgetSheet.getLastRow() >= 2) {
-      try {
-        if (reqYear === undefined || reqYear === null) {
-          let rawMonthVal = budgetSheet.getRange('A2').getValue();
-          if (rawMonthVal instanceof Date && !isNaN(rawMonthVal.getTime())) {
-            targetYear = rawMonthVal.getFullYear();
-            targetMonth = rawMonthVal.getMonth();
-          } else if (typeof rawMonthVal === 'string' && rawMonthVal.trim() !== '') {
-            let testD = new Date(rawMonthVal.trim());
-            if (!isNaN(testD.getTime())) {
-              targetYear = testD.getFullYear();
-              targetMonth = testD.getMonth();
-            }
-          }
-        }
-        targetBudget = Number(parseFloat(budgetSheet.getRange('B2').getValue()) || 0);
-      } catch (e) {
-        // Fallback to defaults
+    let budgetRows = readBudgetTable_(budgetSheet);
+    let budgetMatch = null;
+    for (let b = 0; b < budgetRows.length; b++) {
+      if (budgetRows[b].year === targetYear && budgetRows[b].month === targetMonth) {
+        budgetMatch = budgetRows[b];
+        break;
       }
     }
+    // Target, actual, and extra come from that month's row on the Budget tab.
+    let targetBudget = budgetMatch ? budgetMatch.target : 0;
+    let actualExpense = budgetMatch ? budgetMatch.actual : 0;
+    let extraExpense = budgetMatch ? budgetMatch.extra : 0;
 
     // 2. Setup Past 10 Days Mini-Card Totals (Includes Today: i = 0 to 9).
     // The first 5 stay on the top row; the older 5 render on the row below.
@@ -152,8 +183,6 @@ function getInitialDashboardData(reqYear, reqMonth) {
     const category3MonthTotals = {};
     categories.forEach(function(cat) { category3MonthTotals[cat] = [0, 0, 0]; });
 
-    let actualExpense = 0;
-    let extraExpense = 0;
     const last5DaysRecords = [];
     const significantItems = [];
     const extraItems = [];
@@ -199,14 +228,6 @@ function getInitialDashboardData(reqYear, reqMonth) {
         }
 
         if (expYear !== -1 && expMonth !== -1) {
-          if (expYear === targetYear && expMonth === targetMonth) {
-            if (category.toLowerCase() === 'extra') {
-              extraExpense += amount;
-            } else {
-              actualExpense += amount;
-            }
-          }
-
           let mIdx = -1;
           if (expYear === m0.getFullYear() && expMonth === m0.getMonth()) mIdx = 0;
           else if (expYear === m1.getFullYear() && expMonth === m1.getMonth()) mIdx = 1;
@@ -296,6 +317,7 @@ function getInitialDashboardData(reqYear, reqMonth) {
         targetBudget: String(targetBudget.toFixed(2)),
         actualExpense: String(actualExpense.toFixed(2)),
         extraExpense: String(extraExpense.toFixed(2)),
+        budgetFound: budgetMatch ? true : false,
         remaining: String((targetBudget - actualExpense).toFixed(2)),
         monthName: String(monthNames[targetMonth] + ' ' + targetYear),
         past10Days: past10DaysSummary
@@ -536,6 +558,93 @@ function applyTemplate(formData) {
     }
 
     return { status: 'success', added: rows.length, templates: templates };
+  } catch (error) {
+    return { status: 'error', message: error.toString() };
+  }
+}
+
+function getFinDashboard() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('Fin');
+    if (!sheet || sheet.getLastRow() < 2 || sheet.getLastColumn() < 9) {
+      return { status: 'error', message: 'The Fin sheet is missing. Add the Fin tab to this spreadsheet.' };
+    }
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
+    const values = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+    const headers = values[0];
+    const months = [];
+    for (let c = 9; c < headers.length; c++) {
+      const key = String(headers[c] || '').trim();
+      if (/^\d{4}-\d{2}$/.test(key)) months.push(key);
+    }
+    const items = [];
+    for (let r = 1; r < values.length; r++) {
+      const row = values[r];
+      if (!row[0] && !row[5]) continue;
+      const amounts = {};
+      for (let c = 9; c < headers.length; c++) {
+        const key = String(headers[c] || '').trim();
+        if (!/^\d{4}-\d{2}$/.test(key)) continue;
+        const raw = row[c];
+        if (raw === '' || raw === null) continue;
+        const num = Number(raw);
+        if (!isNaN(num)) amounts[key] = num;
+      }
+      items.push({
+        id: String(row[0]),
+        section: String(row[1] || ''),
+        group: String(row[2] || ''),
+        fixed: String(row[3] || ''),
+        category: String(row[4] || ''),
+        item: String(row[5] || ''),
+        note: String(row[6] || ''),
+        source: String(row[7] || ''),
+        calc: String(row[8] || ''),
+        amounts: amounts
+      });
+    }
+    return { status: 'ok', months: months, items: items, spreadsheetUrl: ss.getUrl() };
+  } catch (error) {
+    return { status: 'error', message: error.toString() };
+  }
+}
+
+function saveFinAmount(payload) {
+  try {
+    const id = String((payload && payload.id) || '').trim();
+    const month = String((payload && payload.month) || '').trim();
+    if (!id || !/^\d{4}-\d{2}$/.test(month)) {
+      return { status: 'error', message: 'Choose an item and a month.' };
+    }
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('Fin');
+    if (!sheet) return { status: 'error', message: 'The Fin sheet is missing.' };
+    const lastCol = sheet.getLastColumn();
+    const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+    let col = -1;
+    for (let c = 0; c < headers.length; c++) {
+      if (String(headers[c]).trim() === month) { col = c + 1; break; }
+    }
+    const lastRow = sheet.getLastRow();
+    const ids = sheet.getRange(2, 1, Math.max(lastRow - 1, 1), 1).getValues();
+    let row = -1;
+    for (let i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]) === id) { row = i + 2; break; }
+    }
+    if (row < 0 || col < 0) return { status: 'error', message: 'That cell is not on the Fin sheet.' };
+    const calc = String(sheet.getRange(row, 9).getValue() || '');
+    if (calc === 'mpf') return { status: 'error', message: 'MPF follows salary and is not typed in.' };
+    const raw = payload.amount;
+    if (raw === '' || raw === null || raw === undefined) {
+      sheet.getRange(row, col).clearContent();
+    } else {
+      const num = Number(raw);
+      if (isNaN(num)) return { status: 'error', message: 'Enter a number.' };
+      sheet.getRange(row, col).setValue(num);
+    }
+    return { status: 'success' };
   } catch (error) {
     return { status: 'error', message: error.toString() };
   }

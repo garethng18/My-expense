@@ -76,6 +76,29 @@
       gap: 10px;
     }
 
+    .page-nav {
+      display: flex;
+      gap: 6px;
+      margin-left: 8px;
+    }
+
+    .page-link {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .page-link.is-current {
+      color: var(--primary-dark);
+      border-color: #bfdbfe;
+      background: var(--primary-50);
+    }
+
     .brand-icon {
       width: 36px;
       height: 36px;
@@ -995,6 +1018,10 @@
       <div>
         <h1 class="brand-title">Daily Expense Tracker</h1>
         <div class="brand-sub">Smart budget sync & activity logs</div>
+        <div class="page-nav">
+          <a class="page-link is-current" href="Index.html">Daily</a>
+          <a class="page-link" id="finLink" href="Fin.html" target="_top">Fin</a>
+        </div>
       </div>
     </div>
 
@@ -1035,15 +1062,15 @@
 
         <div class="budget-stats-trio">
           <div class="stat-tile">
-            <div class="stat-caption">Target</div>
+            <div class="stat-caption">Target Budget</div>
             <div class="stat-number" id="targetVal">$0.00</div>
           </div>
           <div class="stat-tile">
-            <div class="stat-caption">Actual</div>
+            <div class="stat-caption">Actual Expense</div>
             <div class="stat-number" id="actualVal">$0.00</div>
           </div>
           <div class="stat-tile">
-            <div class="stat-caption">Extra</div>
+            <div class="stat-caption">Extra Expense</div>
             <div class="stat-number highlight-extra" id="extraVal">$0.00</div>
           </div>
         </div>
@@ -1303,6 +1330,11 @@
 </div>
 
 <script>
+  var APP_URL = '<?!= appUrl ?>';
+  if (APP_URL && APP_URL.indexOf('http') === 0) {
+    var finLink = document.getElementById('finLink');
+    if (finLink) finLink.href = APP_URL + '?page=fin';
+  }
   document.getElementById('date').value = localDateInputValue();
 
   var isAppsScript = (typeof google !== 'undefined' && google.script && google.script.run);
@@ -1434,7 +1466,9 @@
         subtext.innerHTML = 'Remaining: <strong style="color:#6ee7b7;">$' + remaining.toFixed(2) + '</strong> (' + safePct + '% left)';
       }
     } else {
-      subtext.textContent = "Set month in A2 & budget in B2 (Budget Sheet)";
+      subtext.textContent = stats.budgetFound
+        ? 'This month has no Target Budget on the Budget sheet.'
+        : 'Add this month on the Budget sheet: Month, Target Budget, Actual Expense, Extra Expense.';
       progressBar.style.width = '0%';
     }
 

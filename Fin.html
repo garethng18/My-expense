@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --primary-50: #eff6ff;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --good: #059669;
+      --bad: #dc2626;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+    }
+    .shell { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+    header { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    h1 { font-size: 20px; letter-spacing: -0.03em; }
+    .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .nav { display: flex; gap: 6px; }
+    .nav a, .year-btn, .month-head {
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--muted);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    .nav a.current, .year-btn.active { color: var(--primary-dark); background: var(--primary-50); border-color: #bfdbfe; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: 0 1px 2px rgb(15 23 42 / 0.04); }
+    .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .tile { background: #f8fafc; border-radius: 10px; padding: 10px; }
+    .tile span { display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    .tile strong { display: block; margin-top: 4px; font-size: 16px; }
+    .tile strong.good { color: var(--good); }
+    .tile strong.bad { color: var(--bad); }
+    .toolbar { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+    .years { display: flex; gap: 6px; flex-wrap: wrap; }
+    #status { font-size: 12px; color: var(--muted); }
+    .grid-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 12px; }
+    table { border-collapse: separate; border-spacing: 0; min-width: 980px; width: 100%; }
+    th, td { border-bottom: 1px solid var(--border); padding: 6px 8px; font-size: 12px; white-space: nowrap; }
+    th { position: sticky; top: 0; background: #f8fafc; z-index: 2; text-align: right; font-size: 11px; }
+    th.item-col, td.item-col { position: sticky; left: 0; text-align: left; background: #fff; z-index: 1; min-width: 220px; max-width: 280px; }
+    th.item-col { z-index: 3; background: #f8fafc; }
+    th.active, td.active { background: #eff6ff; }
+    .section td { background: #0f172a; color: #fff; font-weight: 700; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+    .item-name { font-weight: 700; }
+    .item-meta { color: var(--muted); font-size: 10px; font-weight: 500; white-space: normal; }
+    input.amt {
+      width: 88px;
+      border: 1px solid transparent;
+      background: transparent;
+      text-align: right;
+      font: inherit;
+      font-weight: 600;
+      padding: 4px 6px;
+      border-radius: 6px;
+    }
+    input.amt:hover, input.amt:focus { border-color: #93c5fd; background: #fff; outline: none; }
+    .computed { text-align: right; font-weight: 700; color: #0369a1; padding-right: 8px; }
+    @media (max-width: 800px) {
+      .tiles { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div>
+        <h1>Fin Dashboard</h1>
+        <div class="sub">Items down the side, one column per month. Type a cell to save it.</div>
+      </div>
+      <div class="nav">
+        <a id="dailyLink" href="Index.html" target="_top">Daily</a>
+        <a class="current" href="Fin.html">Fin</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section class="card">
+    <div class="toolbar">
+      <div class="years" id="years"></div>
+      <div id="status">Loading the Fin sheet…</div>
+    </div>
+    <div class="grid-wrap">
+      <table>
+        <thead id="head"></thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<script>
+  var APP_URL = '<?!= appUrl ?>';
+  if (APP_URL && APP_URL.indexOf('http') === 0) {
+    document.getElementById('dailyLink').href = APP_URL;
+  }
+
+  var board = null;
+  var selectedYear = 2026;
+  var selectedMonth = '2026-11';
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function money(n) {
+    var v = Math.round((Number(n) || 0) * 100) / 100;
+    return v.toLocaleString('en-HK', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+
+  function salaryFor(key) {
+    if (!board) return 0;
+    for (var i = 0; i < board.items.length; i++) {
+      if (board.items[i].item === '人工') return Number(board.items[i].amounts[key] || 0);
+    }
+    return 0;
+  }
+
+  function amountFor(item, key) {
+    if (item.calc === 'mpf') return Math.round((salaryFor(key) * 0.05 + 180) * 100) / 100;
+    if (!item.amounts || item.amounts[key] === undefined) return null;
+    return Number(item.amounts[key]);
+  }
+
+  function sumWhere(key, group, fixed) {
+    var total = 0;
+    board.items.forEach(function(item) {
+      if (item.group !== group) return;
+      if (fixed && item.fixed !== fixed) return;
+      var n = amountFor(item, key);
+      if (n !== null) total += n;
+    });
+    return total;
+  }
+
+  function renderTiles() {
+    var key = selectedMonth;
+    var income = sumWhere(key, '收入');
+    var fixedExp = sumWhere(key, '支出', '固定');
+    var otherExp = sumWhere(key, '支出', '非固定');
+    var expense = fixedExp + otherExp;
+    var net = income - expense;
+    var assets = sumWhere(key, '資產');
+    var debt = sumWhere(key, '債務');
+    var tiles = [
+      ['Income', income, ''],
+      ['Fixed expense', fixedExp, ''],
+      ['Other expense', otherExp, ''],
+      ['Net', net, net >= 0 ? 'good' : 'bad'],
+      ['Assets − debt', assets - debt, '']
+    ];
+    document.getElementById('tiles').innerHTML = tiles.map(function(tile) {
+      return '<div class="tile"><span>' + tile[0] + '</span><strong class="' + tile[2] + '">' + money(tile[1]) + '</strong></div>';
+    }).join('');
+  }
+
+  function yearsInBoard() {
+    var found = {};
+    board.months.forEach(function(key) { found[key.slice(0, 4)] = true; });
+    return Object.keys(found).sort(function(a, b) { return b - a; });
+  }
+
+  function monthsForYear(year) {
+    var list = [];
+    for (var m = 1; m <= 12; m++) {
+      var key = year + '-' + (m < 10 ? '0' + m : m);
+      if (board.months.indexOf(key) !== -1) list.push(key);
+    }
+    return list;
+  }
+
+  function renderYears() {
+    document.getElementById('years').innerHTML = yearsInBoard().map(function(year) {
+      return '<button type="button" class="year-btn' + (String(year) === String(selectedYear) ? ' active' : '') + '" data-year="' + year + '">' + year + '</button>';
+    }).join('');
+  }
+
+  function renderTable() {
+    var keys = monthsForYear(selectedYear);
+    var head = '<tr><th class="item-col">Item</th>' + keys.map(function(key) {
+      var m = Number(key.slice(5)) - 1;
+      var cls = key === selectedMonth ? ' class="month-head active"' : ' class="month-head"';
+      return '<th' + cls + ' data-month="' + key + '">' + MONTHS[m] + '</th>';
+    }).join('') + '</tr>';
+    document.getElementById('head').innerHTML = head;
+
+    var html = '';
+    var section = '';
+    board.items.forEach(function(item) {
+      if (item.section !== section) {
+        section = item.section;
+        html += '<tr class="section"><td class="item-col" colspan="' + (keys.length + 1) + '">' + escapeHtml(section || 'Items') + '</td></tr>';
+      }
+      var meta = [item.category, item.fixed, item.note].filter(Boolean).join(' · ');
+      html += '<tr><td class="item-col"><div class="item-name">' + escapeHtml(item.item) + '</div><div class="item-meta">' + escapeHtml(meta) + '</div></td>';
+      keys.forEach(function(key) {
+        var cls = key === selectedMonth ? ' class="active"' : '';
+        var value = amountFor(item, key);
+        if (item.calc === 'mpf') {
+          html += '<td' + cls + '><div class="computed" title="5% of salary + 180">' + money(value) + '</div></td>';
+        } else {
+          var shown = value === null ? '' : value;
+          html += '<td' + cls + '><input class="amt" inputmode="decimal" data-id="' + escapeHtml(item.id) + '" data-month="' + key + '" value="' + shown + '"></td>';
+        }
+      });
+      html += '</tr>';
+    });
+    document.getElementById('body').innerHTML = html;
+  }
+
+  function escapeHtml(text) {
+    return String(text || '').replace(/[&<>"']/g, function(ch) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+    });
+  }
+
+  function renderAll() {
+    renderYears();
+    renderTiles();
+    renderTable();
+  }
+
+  function setStatus(text) { document.getElementById('status').textContent = text; }
+
+  document.getElementById('years').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-year]');
+    if (!btn) return;
+    selectedYear = btn.getAttribute('data-year');
+    var keys = monthsForYear(selectedYear);
+    if (keys.indexOf(selectedMonth) === -1) selectedMonth = keys[keys.length - 1];
+    renderAll();
+  });
+
+  document.getElementById('head').addEventListener('click', function(e) {
+    var th = e.target.closest('[data-month]');
+    if (!th) return;
+    selectedMonth = th.getAttribute('data-month');
+    renderAll();
+  });
+
+  document.getElementById('body').addEventListener('change', function(e) {
+    var input = e.target;
+    if (!input.classList || !input.classList.contains('amt')) return;
+    var id = input.getAttribute('data-id');
+    var month = input.getAttribute('data-month');
+    var raw = input.value.trim();
+    if (raw !== '' && isNaN(Number(raw))) {
+      setStatus('Enter a number.');
+      return;
+    }
+    var item = null;
+    for (var i = 0; i < board.items.length; i++) {
+      if (board.items[i].id === id) item = board.items[i];
+    }
+    if (!item) return;
+    if (raw === '') delete item.amounts[month];
+    else item.amounts[month] = Number(raw);
+    renderTiles();
+    if (item.item === '人工') renderTable();
+    if (!(typeof google !== 'undefined' && google.script && google.script.run)) {
+      setStatus('Preview only. Open the deployed app to save this cell.');
+      return;
+    }
+    setStatus('Saving…');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setStatus(res && res.status === 'success' ? 'Saved to the Fin sheet.' : ((res && res.message) || 'Save failed.'));
+      })
+      .withFailureHandler(function(err) { setStatus(err.message || String(err)); })
+      .saveFinAmount({ id: id, month: month, amount: raw });
+  });
+
+  function showBoard(data) {
+    board = data;
+    var years = yearsInBoard();
+    if (years.length && years.indexOf(String(selectedYear)) === -1) selectedYear = years[0];
+    var keys = monthsForYear(selectedYear);
+    if (keys.indexOf(selectedMonth) === -1 && keys.length) selectedMonth = keys[keys.length - 1];
+    setStatus('Click a month to focus it. MPF follows salary.');
+    renderAll();
+  }
+
+  function load() {
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (!data || data.status !== 'ok') {
+            setStatus((data && data.message) || 'Could not load the Fin sheet.');
+            return;
+          }
+          showBoard(data);
+        })
+        .withFailureHandler(function(err) { setStatus(err.message || String(err)); })
+        .getFinDashboard();
+      return;
+    }
+    showBoard({
+      months: ['2026-11', '2026-10', '2026-09'],
+      items: [
+        { id: '1', section: '收入', group: '收入', fixed: '固定', category: '個人', item: 'Salary sample', note: 'Preview row', source: '', calc: '', amounts: { '2026-11': 100000 } },
+        { id: '2', section: '支出 - Regular Expense', group: '支出', fixed: '固定', category: '個人', item: 'MPF', note: '5% of salary + 180', source: '', calc: 'mpf', amounts: {} },
+        { id: '3', section: '支出 - Regular Expense', group: '支出', fixed: '固定', category: '家用', item: 'Home sample', note: 'Type to try the cell', source: '', calc: '', amounts: { '2026-11': 18000 } }
+      ]
+    });
+    setStatus('Local preview. The deployed app reads and saves the Fin sheet.');
+  }
+  load();
+</script>
+</body>
+</html>
